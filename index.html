@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BayCast | 東京湾アングラーズ・ナビ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #090d16 0%, #131c31 100%);
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(19, 28, 49, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="pb-8">
+
+    <header class="sticky top-0 z-50 w-full overflow-hidden shadow-2xl border-b border-slate-800/80 px-6 sm:px-10 py-5 flex items-center justify-between backdrop-blur-xl bg-slate-950/80">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80" alt="Fishing Sunset" class="w-full h-full object-cover filter brightness-50 contrast-110">
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 flex items-center gap-3.5 w-full">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <span class="text-2xl">🎣</span>
+            </div>
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-md">
+                    BayCast
+                </h1>
+                <p class="text-xs text-cyan-300 font-semibold tracking-wider">Tokyo Bay Anglers Condition Navigator</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="w-full px-4 sm:px-8 space-y-6 mt-6">
+
+        <div id="date-container" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+            <!-- JSで動的生成 -->
+        </div>
+
+        <div class="glass-panel p-4 sm:p-5 rounded-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">🛥️ フィールド</label>
+                <select id="select-platform" class="w-full bg-slate-900/90 border border-slate-700/80 text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                    <option value="boat" selected>船・ボート</option>
+                    <option value="shore">おかっぱり (堤防・サーフ)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">📍 エリア選択</label>
+                <select id="select-area" class="w-full bg-slate-900/90 border border-slate-700/80 text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                    <option value="bay_inner">湾奥 (東京・千葉北西)</option>
+                    <option value="bay_mid" selected>湾央 (川崎・横浜・木更津)</option>
+                    <option value="bay_outer">湾口 (横須賀・三浦・富津)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">🎯 ターゲット</label>
+                <select id="select-target" class="w-full bg-slate-900/90 border border-slate-700/80 text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                    <option value="seabass">シーバス</option>
+                    <option value="magochi" selected>マゴチ・ヒラメ</option>
+                    <option value="bluefish">青物 (イナダ・サワラ)</option>
+                    <option value="madai">マダイ</option>
+                    <option value="aji">アジ</option>
+                    <option value="tachiuo">タチウオ</option>
+                    <option value="squid">アオリイカ</option>
+                    <option value="kisu">シロギス</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">🎣 スタイル</label>
+                <select id="select-style" class="w-full bg-slate-900/90 border border-slate-700/80 text-slate-100 text-sm rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                    <option value="lure" selected>ルアー釣り</option>
+                    <option value="bait">餌釣り</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <div class="space-y-6">
+                <div class="glass-panel p-6 rounded-2xl text-center relative overflow-hidden">
+                    <div class="flex justify-around border-b border-slate-800 pb-3 mb-4 text-xs font-bold text-slate-300">
+                        <div id="w-weather">☀️ 晴れ</div>
+                        <div id="w-wind">🍃 北東 3m/s</div>
+                        <div id="w-tide">🌊 中潮</div>
+                    </div>
+                    
+                    <div id="score-display" class="text-6xl sm:text-7xl font-black tracking-tighter text-blue-400 my-2">
+                        --<span class="text-2xl font-bold text-slate-400">点</span>
+                    </div>
+                    <div id="score-comment" class="text-xs sm:text-sm font-medium text-slate-300 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 leading-relaxed mt-4">
+                        --
+                    </div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-2xl">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5 flex items-center justify-between">
+                        <span id="map-title-label">🗺️ 選択エリアハイライト</span>
+                    </div>
+                    
+                    <div class="relative w-full h-64 lg:h-80 rounded-xl overflow-hidden bg-[#060b13] border border-slate-800">
+                        <div id="map-transform-container" class="absolute inset-0 w-full h-full transition-all duration-700 ease-in-out">
+                            <img src="tokyobaie01.webp" 
+                                 alt="Tokyo Bay Map" 
+                                 class="w-full h-full object-cover filter invert grayscale contrast-125 brightness-110 opacity-70">
+                            <div class="absolute inset-0 bg-blue-500 mix-blend-color pointer-events-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-panel p-5 rounded-2xl h-full flex flex-col">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                        🌊 水深別コンディション予測 (全層)
+                    </h2>
+                    <div id="depth-body" class="space-y-3.5 flex-1">
+                        <!-- 動的生成 -->
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-3">📈 直近の水温・酸素・濁度トレンド (全層完全解析)</div>
+                        <div id="trend-box" class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-xs space-y-3 text-slate-300">
+                            <!-- 動的生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        🛠️ 実践タックル & ストラテジー
+                    </h2>
+                    <div id="tackle-card" class="space-y-3.5 text-sm">
+                        <!-- 動的生成 -->
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 rounded-2xl space-y-3 border border-amber-500/20 bg-gradient-to-br from-slate-900/90 to-amber-950/20">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                        🤖 AI地合い予測
+                    </h2>
+                    <div id="ji-ai-card" class="text-xs space-y-3 text-slate-300 leading-relaxed">
+                        <!-- 動的生成 -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="glass-panel p-5 sm:p-6 rounded-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="hourly-title" class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    ⏱️ 3時間ごとの詳細海況予報 (天気・風向風速・干満・潮位)
+                </h2>
+                <div class="flex items-center gap-4 text-xs font-semibold text-slate-300">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> 満潮</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> 干潮</span>
+                </div>
+            </div>
+            <div id="hourly-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <!-- 動的生成 -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 湾口（bay_outer）の origin をさらに南側（100%）へ振り切り、海側へ大きく移動
+        const areaPositions = {
+            bay_inner: {
+                name: "湾奥エリア (東京・千葉北西)",
+                scale: 'scale(1.7)',
+                origin: '45% 10%'
+            },
+            bay_mid: {
+                name: "湾央エリア (川崎・横浜・木更津)",
+                scale: 'scale(1.4)',
+                origin: '50% 50%'
+            },
+            bay_outer: {
+                name: "湾口エリア (横須賀・三浦・富津)",
+                scale: 'scale(1.8)',
+                origin: '45% 100%' // さらに海側（最南端）へフォーカス
+            }
+        };
+
+        function updateMap(areaKey) {
+            const data = areaPositions[areaKey];
+            if (!data) return;
+
+            const mapContainer = document.getElementById('map-transform-container');
+            mapContainer.style.transform = data.scale;
+            mapContainer.style.transformOrigin = data.origin;
+            
+            document.getElementById('map-title-label').textContent = `🗺️ ${data.name}`;
+        }
+
+        const forecasts = [
+            { day: "今日", date: "8/28", weather: "☀️ 晴れ", wind: "北東 3m/s", tide: "中潮", factor: "stable" },
+            { day: "明日", date: "8/29", weather: "☁️ 曇り", wind: "南 4m/s", tide: "中潮", factor: "stable" },
+            { day: "明後日", date: "8/30", weather: "🌧️ 大雨", wind: "南西 9m/s", tide: "大潮", factor: "storm" },
+            { day: "3日後", date: "8/31", weather: "☁️ 曇り", wind: "北 4m/s", tide: "大潮", factor: "after_rain" },
+            { day: "4日後", date: "9/1", weather: "☀️ 晴れ", wind: "北東 3m/s", tide: "中潮", factor: "recovery" },
+            { day: "5日後", date: "9/2", weather: "☀️ 晴れ", wind: "南 2m/s", tide: "小潮", factor: "good" },
+            { day: "6日後", date: "9/3", weather: "☀️ 晴れ", wind: "南 3m/s", tide: "小潮", factor: "good" }
+        ];
+
+        let selectedDayIndex = 0;
+        const dateContainer = document.getElementById('date-container');
+
+        function renderDateSelector() {
+            dateContainer.innerHTML = "";
+            forecasts.forEach((f, index) => {
+                const btn = document.createElement('button');
+                const isActive = index === selectedDayIndex;
+                btn.className = `flex-shrink-0 px-4 py-3 rounded-xl text-center transition-all cursor-pointer ${isActive ? 'bg-blue-600 text-white font-bold shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/50' : 'bg-slate-900/80 text-slate-400 hover:bg-slate-800 border border-slate-800'}`;
+                btn.innerHTML = `<div class="text-xs sm:text-sm">${f.day}</div><div class="text-[10px] opacity-75">${f.date}</div>`;
+                btn.onclick = () => {
+                    selectedDayIndex = index;
+                    renderDateSelector();
+                    updateScreen();
+                };
+                dateContainer.appendChild(btn);
+            });
+        }
+
+        function renderHourlyTimeline(areaKey, factor) {
+            const hourlyContainer = document.getElementById('hourly-container');
+            hourlyContainer.innerHTML = "";
+            const times = ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00"];
+            
+            let areaWindBase = "北東 2m/s";
+            let tideSchedule = [
+                { state: "下げ潮 ↘", label: "潮位 110cm" },
+                { state: "🌊 満潮", label: "潮位 142cm" },
+                { state: "下げ潮 ↘", label: "潮位 120cm" },
+                { state: "下げ潮 ↘", label: "潮位 75cm" },
+                { state: "🏖️ 干潮", label: "潮位 22cm" },
+                { state: "上げ潮 ↗", label: "潮位 65cm" },
+                { state: "上げ潮 ↗", label: "潮位 105cm" },
+                { state: "上げ潮 ↗", label: "潮位 130cm" }
+            ];
+
+            if (areaKey === 'bay_inner') {
+                areaWindBase = "北 3m/s (河川風)";
+            } else if (areaKey === 'bay_outer') {
+                areaWindBase = "南西 5m/s (外洋風)";
+                tideSchedule = [
+                    { state: "下げ潮 ↘", label: "潮位 125cm" },
+                    { state: "🌊 満潮", label: "潮位 158cm" },
+                    { state: "下げ潮 ↘", label: "潮位 135cm" },
+                    { state: "下げ潮 ↘", label: "潮位 85cm" },
+                    { state: "🏖️ 干潮", label: "潮位 15cm" },
+                    { state: "上げ潮 ↗", label: "潮位 75cm" },
+                    { state: "上げ潮 ↗", label: "潮位 118cm" },
+                    { state: "上げ潮 ↗", label: "潮位 145cm" }
+                ];
+            }
+
+            times.forEach((t, i) => {
+                let weatherIcon = "☀️";
+                let windStr = areaWindBase;
+                let tideInfo = tideSchedule[i];
+                let badgeStyle = "bg-slate-900 text-slate-300 border-slate-800";
+
+                if (factor === 'storm') {
+                    weatherIcon = "🌧️";
+                    windStr = (areaKey === 'bay_outer') ? "南西 14m/s" : "南西 10m/s";
+                } else if (factor === 'after_rain') {
+                    weatherIcon = "💧";
+                    windStr = "北 4m/s (濁り)";
+                }
+
+                if (tideInfo.state.includes("満潮")) {
+                    badgeStyle = "bg-blue-500/20 text-blue-400 border-blue-500/40 font-bold";
+                } else if (tideInfo.state.includes("干潮")) {
+                    badgeStyle = "bg-amber-500/20 text-amber-400 border-amber-500/40 font-bold";
+                }
+
+                hourlyContainer.innerHTML += `
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-center space-y-1.5 hover:border-blue-500/50 transition-all flex flex-col justify-between">
+                        <div class="text-xs font-bold text-slate-300">${t}</div>
+                        <div class="text-lg">${weatherIcon}</div>
+                        <div class="text-[11px] font-semibold text-slate-200">🍃 ${windStr}</div>
+                        <div class="space-y-1 pt-1 border-t border-slate-800/80">
+                            <div class="text-[11px] px-1.5 py-0.5 rounded-md border ${badgeStyle}">${tideInfo.state}</div>
+                            <div class="text-[10px] text-slate-400">${tideInfo.label}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function getScoreBadge(score) {
+            if (score >= 80) return `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">${score}点</span>`;
+            if (score >= 50) return `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">${score}点</span>`;
+            return `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">${score}点</span>`;
+        }
+
+        function generateCondition(platform, area, target, style, factor) {
+            let res = { score: 75, comment: "", depths: [], tackle: "", item: "", color: "", terrain: "", jiai: "", trendHtml: "" };
+            let areaName = (area === 'bay_inner') ? "湾奥エリア" : (area === 'bay_mid') ? "湾央エリア" : "湾口エリア";
+
+            if (platform === 'boat') {
+                if (target === 'magochi' && style === 'lure') {
+                    res.tackle = "6.3ft LJロッド (ML〜M) / 3000XGスピニング / PE 1.2号";
+                    res.item = "エコギア バルト4インチ ＋ 静ヘッド (20〜30g)";
+                    res.color = "ピンクグロウバック、常磐プレシャスオレンジ";
+                    res.terrain = "水深10〜15mのブレイク（駆け上がり）やシェルベッド周辺。";
+                } else {
+                    res.tackle = "ターゲット専用ボートロッド / 小型両軸・スピニングリール";
+                    res.item = (style === 'lure') ? "専用メタルジグ・ルアー各種" : "専用船仕掛け ＋ 活きエビ/コマセ";
+                    res.color = "潮流と水色に合わせたカラーチョイス。";
+                    res.terrain = "潮通しの良い根周りやチャンネルラインを直撃。";
+                }
+            } else {
+                res.tackle = "9.0ft〜10.6ft ショア用ロッド / 4000番リール / PE 1.2〜1.5号";
+                res.item = (style === 'lure') ? "30gメタルジグ または 12cmミノー" : "遠投仕掛け ＋ 青イソメ等";
+                res.color = "朝マズメの光量や濁りに合わせたアピールカラー。";
+                res.terrain = "サーフの離岸流や、足元から水深のある堤防先端の潮目を遠投。";
+            }
+
+            let topInfo = { title: "■ 表層 (0〜5m)", temp: "24.5℃", doVal: "DO: 6.8 mg/L", turb: "濁度: 1.5 FTU (透明度やや高め)", desc: "大気からの酸素供給が豊富でベイトの活性が高いレンジ。" };
+            let midInfo = { title: "■ 中層 (5〜15m)", temp: "21.8℃", doVal: "DO: 5.8 mg/L", turb: "濁度: 2.2 FTU (安定)", desc: "サーモクライン形成層。魚のスクールが最も滞留しやすい。" };
+            let botInfo = { title: "■ 底層 (15m〜海底)", temp: "18.2℃", doVal: "DO: 5.2 mg/L", turb: "濁度: 3.8 FTU (底質微粒子)", desc: "底物の根魚やフラットフィッシュに直結する安定した環境。" };
+
+            if (area === 'bay_inner') {
+                topInfo.temp = "25.4℃"; topInfo.doVal = "DO: 7.2 mg/L"; topInfo.turb = "濁度: 3.5 FTU (笹濁り)"; topInfo.desc = "河川水流入とプランクトン活性が高く表層の酸素供給は活発だがやや濁りあり。";
+                midInfo.temp = "22.2℃"; midInfo.doVal = "DO: 5.0 mg/L"; midInfo.turb = "濁度: 4.1 FTU (マッディ)"; midInfo.desc = "サーモクライン下部で有機物分解による酸素消費あり。";
+                botInfo.temp = "17.8℃"; botInfo.doVal = "DO: 4.2 mg/L (貧酸素注意⚠️)"; botInfo.turb = "濁度: 6.5 FTU (底泥サスペンド)"; botInfo.desc = "夏場特有の酸素薄化と底質の巻き上げ傾向に注意。";
+                if (factor === 'after_rain') { res.score = 52; } else if (factor === 'storm') { res.score = 15; }
+            } else if (area === 'bay_outer') {
+                topInfo.temp = "23.8℃"; topInfo.doVal = "DO: 7.0 mg/L"; topInfo.turb = "濁度: 0.8 FTU (極めてクリア)"; topInfo.desc = "黒潮系の外洋水でクリアかつ酸素供給量が非常に豊富。";
+                midInfo.temp = "21.0℃"; midInfo.doVal = "DO: 6.5 mg/L"; midInfo.turb = "濁度: 1.1 FTU (澄み潮)"; midInfo.desc = "潮流が速く、中層全域で絶好の溶存酸素量を維持。";
+                botInfo.temp = "17.2℃"; botInfo.doVal = "DO: 6.3 mg/L"; midInfo.turb = "濁度: 2.0 FTU (安定)"; midInfo.desc = "海底までたっぷり酸素が行き届き根魚や青物の活性が抜群。";
+            }
+
+            res.trendHtml = `
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-cyan-300">${topInfo.title}</span>
+                        <span class="text-cyan-400 font-bold">${topInfo.temp} / ${topInfo.doVal}</span>
+                    </div>
+                    <div class="text-[11px] text-cyan-200/90 mb-0.5">💧 ${topInfo.turb}</div>
+                    <div class="text-[11px] text-slate-400">${topInfo.desc}</div>
+                </div>
+                <div class="pt-2 border-t border-slate-800/80">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-blue-300">${midInfo.title}</span>
+                        <span class="text-blue-400 font-bold">${midInfo.temp} / ${midInfo.doVal}</span>
+                    </div>
+                    <div class="text-[11px] text-blue-200/90 mb-0.5">💧 ${midInfo.turb}</div>
+                    <div class="text-[11px] text-slate-400">${midInfo.desc}</div>
+                </div>
+                <div class="pt-2 border-t border-slate-800/80">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-emerald-300">${botInfo.title}</span>
+                        <span class="text-emerald-400 font-bold">${botInfo.temp} / ${botInfo.doVal}</span>
+                    </div>
+                    <div class="text-[11px] text-emerald-200/90 mb-0.5">💧 ${botInfo.turb}</div>
+                    <div class="text-[11px] text-slate-400">${botInfo.desc}</div>
+                </div>
+            `;
+
+            let d_top = { zone: "表層", range: "0m 〜 5m", eval: 75, text: `${topInfo.doVal} / ${topInfo.turb}` };
+            let d_mid = { zone: "中層", range: "5m 〜 15m", eval: 80, text: `${midInfo.doVal} / ${midInfo.turb}` };
+            let d_bot = { zone: "底層", range: "15m 〜 海底", eval: 85, text: `${botInfo.doVal} / ${botInfo.turb}` };
+
+            if (factor === 'storm') {
+                res.score = 15;
+                res.comment = `⚠️【${areaName} 荒天予測】南西の強風と波浪により全層で撹乱が発生。出船見合わせを推奨します。`;
+                res.jiai = `<span class="text-rose-400 font-bold">【地合い消滅・釣行不適】</span><br>南西の暴風波浪により底荒れと激しい濁りが進行。`;
+                d_top.eval = 15; d_mid.eval = 25; d_bot.eval = 30;
+            } else if (factor === 'after_rain') {
+                res.score = 52;
+                res.comment = `⚠️【${areaName} 水潮・濁り予測】河川水の影響で表層の塩分が低下。レンジの調整が不可欠です。`;
+                res.jiai = `<span class="text-amber-400 font-bold">【塩分・レンジ変動型アクティブタイム】</span><br>表層のフィーディングは不成立となり、塩分と水温が安定する中層〜底層でのみ捕食スイッチが入ります。`;
+                d_top.eval = 30; d_mid.eval = 65; d_bot.eval = 80;
+            } else if (factor === 'recovery') {
+                res.score = 88;
+                res.comment = `✨【${areaName} 爆釣ハイシーズン】水潮が抜け、潮目がくっきりと形成される絶好のコンディション！`;
+                res.jiai = `<span class="text-emerald-400 font-bold">【ゴールデンカレント・ピークタイム】</span><br>水潮の濁りが完全に抜け、外洋からのクリアな潮が流入。中潮の適度な潮流と相まって、ブレイクラインに強力な潮目が形成されます。`;
+                d_top.eval = 88; d_mid.eval = 90; d_bot.eval = 92;
+            } else {
+                res.score = 78;
+                res.comment = `🌊【${areaName} 安定コンディション】中潮の適度な潮流に乗って、標準的かつ手堅い釣果が期待できます。`;
+                res.jiai = `<span class="text-cyan-400 font-bold">【潮位・カレント同調タイム】</span><br>中潮特有の二枚潮の傾向が少なく、水温層（サーモクライン）が綺麗に安定しています。`;
+            }
+
+            res.depths = [d_top, d_mid, d_bot];
+            return res;
+        }
+
+        function updateScreen() {
+            const platform = document.getElementById('select-platform').value;
+            const area = document.getElementById('select-area').value;
+            const target = document.getElementById('select-target').value;
+            const style = document.getElementById('select-style').value;
+            
+            updateMap(area);
+            const forecast = forecasts[selectedDayIndex];
+            
+            document.getElementById('w-weather').textContent = forecast.weather;
+            document.getElementById('w-wind').textContent = forecast.wind;
+            document.getElementById('w-tide').textContent = forecast.tide;
+
+            renderHourlyTimeline(area, forecast.factor);
+
+            const condition = generateCondition(platform, area, target, style, forecast.factor);
+
+            document.getElementById('score-display').innerHTML = `${condition.score}<span class="text-2xl font-bold text-slate-400">点</span>`;
+            document.getElementById('score-comment').textContent = condition.comment;
+            document.getElementById('ji-ai-card').innerHTML = condition.jiai;
+            document.getElementById('trend-box').innerHTML = condition.trendHtml;
+
+            const depthBody = document.getElementById('depth-body');
+            depthBody.innerHTML = "";
+            condition.depths.forEach(d => {
+                depthBody.innerHTML += `
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                        <div>
+                            <div class="font-bold text-slate-200 text-sm">${d.zone}</div>
+                            <div class="text-[11px] text-slate-400">目安: ${d.range}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="mb-1">${getScoreBadge(d.eval)}</div>
+                            <div class="text-[11px] text-slate-400">${d.text}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('tackle-card').innerHTML = `
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">🎣 推奨タックル</div>
+                    <div class="text-slate-200 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">${condition.tackle}</div>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">🎯 ルアー・仕掛け</div>
+                    <div class="text-slate-200 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">${condition.item}</div>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">💡 カラー・攻略戦略</div>
+                    <div class="text-slate-200 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">${condition.color}</div>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase mb-1">🏞️ 地形・ポイントアプローチ</div>
+                    <div class="text-slate-200 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">${condition.terrain}</div>
+                </div>
+            `;
+        }
+
+        ['select-platform', 'select-area', 'select-target', 'select-style'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updateScreen);
+        });
+
+        renderDateSelector();
+        updateScreen();
+    </script>
+</body>
+</html>
